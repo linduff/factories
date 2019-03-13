@@ -1,0 +1,68 @@
+*{font-family: helvetica;}
+.factory-list {
+	font-size: 20px;
+	line-height: 4pt;
+	padding-left: 10px;
+	padding-top: 10px;
+}
+.child-list {
+	font-size: 16px;
+	line-height: 0pt;
+	padding-left: 30px;
+}
+.add-factory-popup, .edit-factory-popup {
+	display: none;
+	position: fixed;
+	top: 0;
+	right: 15px;
+	border: 3px solid #f1f1f1;
+	z-index: 9;
+}
+.add-factory-container, .edit-factory-container {
+	max-width: 300px;
+	padding: 10px;
+	background-color: white;
+}
+.add-factory-container input[type=text], .add-factory-container input[type=integer], .edit-factory-container input[type=text], .edit-factory-container input[type=integer] {
+	width: 90%;
+	padding: 15px;
+	margin: 5px 0 22px 0;
+	border: none;
+	background: #f1f1f1;
+}
+.add-factory-container input[type=text]:focus, .add-factory-container input[type=integer]:focus, .edit-factory-container input[type=text]:focus, .edit-factory-container input[type=integer]:focus {
+	background-color:#ddd;
+	outline: none;
+}
+.btn {
+	background-color: #009ACD;
+	color: white;
+	padding: 10px 15px;
+	border: none;
+	cursor: pointer;
+	width: 200px;
+	margin-bottom:5px;
+	margin-top:5px;
+	opacity: 0.8;
+	font-size: 20px;
+}
+.in-container {
+	width: 100%;
+}
+.cancel {
+	background-color: red;
+}
+.btn:hover {
+	opacity: 1;
+}
+.header {
+	background-color: #ddd;
+	text-align: center;
+}
+.root {
+	background-color: #009ACD;
+	color: white;
+	margin-top: 10px;
+	padding: 15px;
+	font-size: 20px;
+}

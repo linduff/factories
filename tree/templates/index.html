@@ -1,0 +1,255 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+<!---		<script type="text/javascript" src="{% static 'js/script.js' %}"></script> --->
+		<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+		<meta charset="UTF-8">
+		<title>Linduff</title>
+	</head>
+	<body>
+
+		<!--- Top Row Buttons --->
+		<div class="header">
+			<button class="btn" onclick="addFactory()">Add Factory</button>
+			<button class="btn" onclick="editFactory()">Edit Factory</button>
+			<button class="btn cancel" onclick="deleteFactory()">Delete Factory</button>
+			<a href="{% url 'deleteall' %}"><button class="btn cancel">Delete All</button></a>
+		</div>
+
+		<div class="root">Root</div>
+
+		<!--- Listing the factories and children --->
+		{% for factory in factory_list %}
+			<p class="factory-list">{{ factory.name }} ({{ factory.minimum }}, {{ factory.maximum }})</p>
+			{% for child in child_list %}
+				{% if child.factory_id.id == factory.id %}
+					<p class="child-list">&#9492; {{ child.value }}</p>
+				{% endif %}
+			{% endfor %}
+		{% endfor %}
+		
+		<!--- Form used for adding a factory --->
+		<div class="add-factory-popup" id="addFactory">
+			<form name = "addform" action="{% url 'afact' %}" class="add-factory-container" onsubmit="return validateadd()" method="POST">
+				{% csrf_token %}
+				<h1>Add Factory</h1>
+				<label for="name"><b>Factory Name</b></label>
+				{{ afform.name }}
+				
+				<label for="minimum"><b>Minimum Number</b></label>
+				{{ afform.minimum }}
+
+				<label for="maximum"><b>Maximum Number</b></label>
+				{{ afform.maximum }}
+
+				<label for="children"><b>Number of Children</b></label>
+				{{ afform.children }}
+
+				<button type="submit" class="btn in-container">Submit</button>
+				<button type="reset" class="btn cancel in-container" onclick="closeAddFactory()">Cancel</button>
+			</form>
+		</div>
+		<!--- Form used for editing a factory --->
+		<div class="add-factory-popup" id="editFactory">
+			<form name = "editform" action="{% url 'efact' %}" class="add-factory-container" onsubmit="return validateedit()" method="POST">
+				{% csrf_token %}
+				<h1>Edit Factory</h1>
+				<label for="select"><b>Which Factory?</b></label>
+				{{ efform.select }}
+				<label for="name"><b>New Factory Name</b></label>
+				{{ efform.name }}
+				<label for="minimum"><b>New Minimum Number</b></label>
+				{{ efform.minimum }}
+
+				<label for="maximum"><b>New Maximum Number</b></label>
+				{{ efform.maximum }}
+
+				<button type="submit" class="btn in-container">Submit</button>
+				<button type="reset" class="btn cancel in-container" onclick="closeEditFactory()">Cancel</button>
+			</form>
+		</div>
+		<!--- Form used for deleting a factory --->
+		<div class="add-factory-popup" id="deleteFactory">
+			<form name = "deleteform" action="{% url 'dfact' %}" class="add-factory-container" onsubmit="return validatedelete()" method="POST">
+				{% csrf_token %}
+				<h1>Delete Factory</h1>
+				<label for="select"><b>Which Factory?</b></label>
+				{{ dfform.select }}
+
+				<button type="submit" class="btn in-container">Submit</button>
+				<button type="reset" class="btn cancel in-container" onclick="closeDeleteFactory()">Cancel</button>
+			</form>
+		</div>
+	</body>
+	<script type="text/javascript">
+		var NameRegEx = /^[a-z0-9]+$/i;
+		var NumRegEx = /^\d+$/;
+
+		function addFactory() {
+			document.getElementById("addFactory").style.display = "block";
+			closeEditFactory();
+			closeDeleteFactory();
+		}
+
+		function closeAddFactory() {
+			document.getElementById("addFactory").style.display = "none";
+		}
+
+
+		function editFactory() {
+			document.getElementById("editFactory").style.display = "block";
+			closeAddFactory();
+			closeDeleteFactory();
+		}
+
+		function closeEditFactory() {
+			document.getElementById("editFactory").style.display = "none";
+		}
+
+
+		function deleteFactory() {
+			document.getElementById("deleteFactory").style.display = "block";
+			closeAddFactory();
+			closeEditFactory();
+		}
+
+		function closeDeleteFactory() {
+			document.getElementById("deleteFactory").style.display = "none";
+		}
+
+		// converts the factory names string to a javascript list
+		function stringtolist() {
+			var name_list = '{{ factory_name_list }}';
+			
+			var names = [];
+			var temp_name = "";
+			var i = 0;
+			while(i < name_list.length){
+				if(name_list[i] == ";" && NameRegEx.test(name_list[i+1])) {
+					i++;
+					while(NameRegEx.test(name_list[i])){
+						temp_name += name_list[i];
+						i++;
+					}
+					names.push(temp_name);
+					temp_name = "";
+				}
+				i++;
+			}
+			return names;
+		}
+
+		// validates that the add form is logically sound
+		function validateadd() {
+			var alertString = "";
+			var flag = 0;
+
+			var name = document.forms["addform"]["name"].value;
+			var mi = parseInt(document.forms["addform"]["minimum"].value);
+			var ma = parseInt(document.forms["addform"]["maximum"].value);
+			var numchildren = parseInt(document.forms["addform"]["children"].value);
+			
+			var names = stringtolist();
+
+			n = 0;
+			while(n < names.length) {
+				if(!(name.localeCompare(names[n]))){
+					alertString += name + " is already a factory\n";
+					flag = 1;
+					break;
+				}
+				n++;
+			}
+			
+			if(!(NameRegEx.test(name))) {
+				alertString += "Factory Name must only contain letters and numbers\n";
+				flag = 1;
+			}
+			if(!(NumRegEx.test(document.forms["addform"]["minimum"].value))) {
+				alertString += "Minimum must be an integer\n";
+				flag = 1;
+			}
+			if(!(NumRegEx.test(document.forms["addform"]["maximum"].value))) {
+				alertString += "Maximum must be an integer\n";
+				flag = 1;
+			}
+			if(mi > ma) {
+				alertString += "Minimum must be less than or equal to Maximum!\n";
+				flag = 1;
+			}
+
+			if(!(NumRegEx.test(document.forms["addform"]["children"].value))) {
+				alertString += "Children must be an integer\n";
+				flag = 1;
+			}
+
+			if(numchildren < 1 || numchildren > 15) {
+				alertString += "The number of children must be 1-15\n";
+				flag = 1;
+			}
+
+			if(flag == 1) {
+				alert(alertString + "Try again");
+				return false;
+			}
+
+		return true;
+		}
+
+		// validates that the edit form is logically sound
+		function validateedit() {
+			var alertString = ""
+			var flag = 0
+			var select = document.forms["editform"]["select"].value;
+			var mi = document.forms["editform"]["minimum"].value;
+			var ma = document.forms["editform"]["maximum"].value;
+
+			var names = stringtolist();
+
+			if(!(NumRegEx.test(document.forms["editform"]["minimum"].value)) && "none".localeCompare(mi)) {
+				alertString += "Minimum must be an integer\n";
+				flag = 1;
+			}
+			if(!(NumRegEx.test(document.forms["editform"]["maximum"].value)) && "none".localeCompare(ma)) {
+				alertString += "Maximum must be an integer\n";
+				flag = 1;
+			}
+
+			n = 0;
+			while(n < names.length) {
+				if(!(select.localeCompare(names[n]))){
+					if(flag == 1) {
+						alert(alertString + "Try again");
+						return false;
+					}
+					else {
+						return true;
+					}
+				}
+				n++;
+			}
+			alert(alertString + select + " is not the name of a current factory\nTry again");
+			return false;
+		}
+
+		// Validates that the delete form is logically sound
+		function validatedelete() {
+			var select = document.forms["deleteform"]["select"].value;
+
+			var names = stringtolist();
+
+			n = 0;
+			while(n < names.length) {
+				if(!(select.localeCompare(names[n]))){
+					return true;
+				}
+				n++;
+			}
+			alert(select + " is not a factory\nTry again");
+			return false;
+
+		}
+	</script>
+</html>
