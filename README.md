@@ -11,8 +11,6 @@ This project uses Django to create a website.
 
 /tree/templates/index.html  - HTML and javascript for the page
 
-Note: I wanted to put the javascript into a separate file, but for some reason, it wouldn't work correctly. I decided to just put it in the html where it does work.
-
 ### Run it Yourself
 
 1. Make sure you have Django installed (This runs on version 2.1.1)
